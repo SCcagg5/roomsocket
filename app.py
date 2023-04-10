@@ -4,13 +4,13 @@ from gevent import monkey; monkey.patch_all()
 from gevent.pywsgi import WSGIServer
 from socketio import Server, WSGIApp
 
-app = Bottle()
+bottle_app = Bottle()
 sio = Server()
-app = WSGIApp(sio, app)
+app = WSGIApp(sio, bottle_app)
 
 user_data = {}
 
-@app.route('/')
+@bottle_app.route('/')
 def index():
     return static_file('index.html', root='./')
 
