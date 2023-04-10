@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SocketIO Mouse Tracker</title>
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg" crossorigin="anonymous"></script>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
+    <script>
+        const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {transports: ['websocket']});
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        let room = 'room1';
+
+        socket.emit('connect');
+        socket.emit('join', {'room': room});
+
+        socket.on('update_position', (data) => {
+            context.beginPath();
+            context.arc(data.x, data.y, 2, 0, 2 * Math.PI);
+            context.fillStyle = 'blue';
+            context.fill();
+        });
+
+        socket.on('update_left_click', (data) => {
+            context.beginPath();
+            context.arc(data.x, data.y, 5, 0, 2 * Math.PI);
+            context.fillStyle = 'red';
+            context.fill();
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            socket.emit('mouse_position', {'room': room, 'x': x, 'y': y});
+        });
+
+        canvas.addEventListener('mousedown', (event) => {
+            if (event.button === 0) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                socket.emit('left_click', {'room': room, 'x': x, 'y': y});
+            }
+        });
+    </script>
+</body>
+</html>
