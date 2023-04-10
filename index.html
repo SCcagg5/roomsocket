@@ -7,7 +7,7 @@
 <body>
     <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
     <script>
-        const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {transports: ['websocket']});
+        const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {transports: ['websocket'], upgrade: false});
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
         let room = 'room1';
