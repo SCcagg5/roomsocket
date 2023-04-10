@@ -12,7 +12,6 @@
         const context = canvas.getContext('2d');
         let room = 'room1';
 
-        socket.emit('connect');
         socket.emit('join', {'room': room});
 
         socket.on('update_position', (data) => {
