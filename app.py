@@ -5,7 +5,7 @@ from gevent.pywsgi import WSGIServer
 from socketio import Server, WSGIApp
 
 bottle_app = Bottle()
-sio = Server()
+sio = Server(cors_allowed_origins='*')
 app = WSGIApp(sio, bottle_app)
 
 user_data = {}
@@ -14,9 +14,9 @@ user_data = {}
 def index():
     return static_file('index.html', root='./')
 
-@sio.on('connect')
-def connect(sid, environ):
-    room = environ['HTTP_X_ROOM']
+@sio.on('join')
+def join(sid, data):
+    room = data['room']
     sio.enter_room(sid, room)
     user_data[sid] = {'x': 0, 'y': 0, 'last_click': None}
     for user_sid, user_info in user_data.items():
