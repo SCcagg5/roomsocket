@@ -72,7 +72,7 @@ async def left_click(sid, data):
 @sio.on('disconnect')
 async def disconnect(sid):
     for room in sio.rooms(sid):
-        await sio.leave_room(sid, room)
+        sio.leave_room(sid, room)
         if room in rooms:
             rooms[room].discard(sid)
     if sid in user_data:
