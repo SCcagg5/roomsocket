@@ -23,7 +23,7 @@ async def index(request):
 @sio.on('join')
 async def join(sid, data):
     room = data['room']
-    await sio.enter_room(sid, room)
+    sio.enter_room(sid, room)
     user_data[sid] = User(sid, 0, 0)
     if room not in rooms:
         rooms[room] = set()
