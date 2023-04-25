@@ -37,7 +37,7 @@ async def join(sid, data):
     print(f"{sid} has joined room {room}")
 
 @sio.on('get_rooms')
-async def get_rooms(data):
+async def get_rooms(sid, data):
     room_data = {}
     for room, users in rooms.items():
         room_data[room] = list(users)
