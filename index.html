@@ -3,17 +3,50 @@
 <head>
     <title>SocketIO Mouse Tracker</title>
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" crossorigin="anonymous"></script>
+    <style>
+        #container {
+            display: flex;
+        }
+        #roomList {
+            width: 300px;
+            border-right: 1px solid black;
+            padding: 10px;
+        }
+        #canvasContainer {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
+    <div id="container">
+        <div id="roomList">
+            <h3>Rooms</h3>
+            <ul id="rooms"></ul>
+        </div>
+        <div id="canvasContainer">
+            <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
+            <button id="disconnectBtn" style="position: absolute; top: 10px; right: 10px;">Disconnect</button>
+        </div>
+    </div>
     <script>
         const socket = io("http://localhost:8080");
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
+        const roomsList = document.getElementById('rooms');
+        const disconnectBtn = document.getElementById('disconnectBtn');
         let room = 'room1';
 
         socket.emit('join', {'room': room});
         socket.emit('get_rooms', void 0);
+
+        socket.on('room_data', (data) => {
+            roomsList.innerHTML = '';
+            for (const [roomName, users] of Object.entries(data)) {
+                const roomItem = document.createElement('li');
+                roomItem.textContent = `${roomName} (${users.length} user${users.length !== 1 ? 's' : ''})`;
+                roomsList.appendChild(roomItem);
+            }
+        });
 
         socket.on('update_position', (data) => {
             context.beginPath();
@@ -43,6 +76,10 @@
                 const y = event.clientY - rect.top;
                 socket.emit('left_click', {'room': room, 'x': x, 'y': y});
             }
+        });
+
+        disconnectBtn.addEventListener('click', () => {
+            socket.disconnect();
         });
     </script>
 </body>
