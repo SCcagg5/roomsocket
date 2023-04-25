@@ -41,6 +41,7 @@ async def get_rooms():
     room_data = {}
     for room, users in rooms.items():
         room_data[room] = list(users)
+    print(room_data)
     await sio.emit('room_data', room_data)
 
 @sio.on('mouse_position')
