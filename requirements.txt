@@ -1,2 +1,2 @@
 aiohttp
-python-socketio==5.0.0
+python-socketio==5.4.0
