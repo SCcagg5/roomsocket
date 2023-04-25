@@ -13,6 +13,7 @@
         let room = 'room1';
 
         socket.emit('join', {'room': room});
+        socket.emit('get_rooms', void 0);
 
         socket.on('update_position', (data) => {
             context.beginPath();
