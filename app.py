@@ -37,11 +37,11 @@ async def join(sid, data):
     print(f"{sid} has joined room {room}")
 
 @sio.on('get_rooms')
-async def get_rooms(sid):
+async def get_rooms():
     room_data = {}
     for room, users in rooms.items():
         room_data[room] = list(users)
-    await sio.emit('room_data', room_data, room=sid)
+    await sio.emit('room_data', room_data)
 
 @sio.on('mouse_position')
 async def mouse_position(sid, data):
