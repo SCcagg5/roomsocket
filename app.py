@@ -54,7 +54,7 @@ async def mouse_position(sid, data):
     await sio.emit('update_position', {'sid': sid, 'x': data['x'], 'y': data['y']}, room=room)
     
 @sio.on('email')
-async def mouse_position(sid, data):
+async def email_update(sid, data):
     room = data.get('room')
     if sid not in user_data:
         user_data[sid] = User(sid, 0, 0)
