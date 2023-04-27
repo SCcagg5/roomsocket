@@ -9,7 +9,7 @@ class User:
         self.email = None
         self.last_click = last_click
 
-sio = socketio.AsyncServer()
+sio = socketio.AsyncServer(cors_allowed_origins='*')
 app = web.Application()
 sio.attach(app)
 
@@ -24,14 +24,14 @@ async def index(request):
 async def join(sid, data):
     room = data['room']
     sio.enter_room(sid, room)
-    user_data[sid] = User(sid, 0, 0)
+    user_data[sid] = User(sid, 0, 0, data['email'])
     if room not in rooms:
         rooms[room] = set()
     rooms[room].add(sid)
     for user_sid in rooms[room]:
         if user_sid != sid:
             user = user_data[user_sid]
-            await sio.emit('update_position', {'sid': user.sid, 'x': user.x, 'y': user.y}, room=sid)
+            await sio.emit('update_position', {'sid': user.sid, 'email': user.email, 'x': user.x, 'y': user.y}, room=sid)
             if user.last_click:
                 await sio.emit('update_left_click', {'sid': user.sid, 'x': user.last_click[0], 'y': user.last_click[1]}, room=sid)
     print(f"{sid} has joined room {room}")
@@ -77,6 +77,10 @@ async def disconnect(sid):
             rooms[room].discard(sid)
     if sid in user_data:
         del user_data[sid]
+    room_data = {}
+    for room, users in rooms.items():
+        room_data[room] = list(users)
+    await sio.emit('room_data', room_data)
     print(f"{sid} has left the room(s)")
 
 app.router.add_get('/', index)
