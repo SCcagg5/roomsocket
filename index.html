@@ -36,7 +36,7 @@
         const disconnectBtn = document.getElementById('disconnectBtn');
         let room = 'room1';
 
-        socket.emit('join', {'room': room});
+        socket.emit('join', {'room': room, 'email':'amine.babba@hotmail.com'});
         socket.emit('get_rooms', void 0);
 
         socket.on('room_data', (data) => {
