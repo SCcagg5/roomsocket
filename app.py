@@ -1,6 +1,13 @@
 from aiohttp import web
 import socketio
 
+class Image:
+    def __init__(self, image_id, x, y, scale):
+        self.image_id = image_id
+        self.x = x
+        self.y = y
+        self.scale = scale
+
 class User:
     def __init__(self, sid, x, y, last_click=None):
         self.sid = sid
@@ -8,6 +15,7 @@ class User:
         self.y = y
         self.email = None
         self.last_click = last_click
+        self.images = {}
 
 sio = socketio.AsyncServer(cors_allowed_origins='*')
 app = web.Application()
@@ -34,6 +42,8 @@ async def join(sid, data):
             await sio.emit('update_position', {'sid': user.sid, 'email': user.email, 'x': user.x, 'y': user.y}, room=sid)
             if user.last_click:
                 await sio.emit('update_left_click', {'sid': user.sid, 'x': user.last_click[0], 'y': user.last_click[1]}, room=sid)
+            for image_id, image in user.images.items():
+                await sio.emit('update_image', {'image_id': image_id, 'x': image.x, 'y': image.y, 'scale': image.scale}, room=sid)
     print(f"{sid} has joined room {room}")
 
 @sio.on('get_rooms')
@@ -52,7 +62,7 @@ async def mouse_position(sid, data):
     user_data[sid].x = data['x']
     user_data[sid].y = data['y']
     await sio.emit('update_position', {'sid': sid, 'x': data['x'], 'y': data['y']}, room=room)
-    
+
 @sio.on('email')
 async def email_update(sid, data):
     room = data.get('room')
@@ -68,6 +78,34 @@ async def left_click(sid, data):
         user_data[sid] = User(sid, 0, 0)
     user_data[sid].last_click = (data['x'], data['y'])
     await sio.emit('update_left_click', {'sid': sid, 'x': data['x'], 'y': data['y']}, room=room)
+
+@sio.on('add_image')
+async def add_image(sid, data):
+    room = data.get('room')
+    image_id = data['image_id']
+    x = data['x']
+    y = data['y']
+    scale = data['scale']
+
+    if sid not in user_data:
+        user_data[sid] = User(sid, 0, 0)
+
+    user_data[sid].images[image_id] = Image(image_id, x, y, scale)
+    await sio.emit('update_image', {'image_id': image_id, 'x': x, 'y': y, 'scale': scale}, room=room)
+
+@sio.on('update_image')
+async def update_image(sid, data):
+    room = data.get('room')
+    image_id = data['image_id']
+    x = data['x']
+    y = data['y']
+    scale = data['scale']
+
+    if sid not in user_data:
+        user_data[sid] = User(sid, 0, 0)
+
+    user_data[sid].images[image_id] = Image(image_id, x, y, scale)
+    await sio.emit('update_image', {'image_id': image_id, 'x': x, 'y': y, 'scale': scale}, room=room)
 
 @sio.on('disconnect')
 async def disconnect(sid):
